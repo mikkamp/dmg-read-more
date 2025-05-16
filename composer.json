@@ -1,0 +1,9 @@
+{
+	"name": "dmg/read-more",
+	"autoload": {
+		"psr-4": {
+			"DMG\\ReadMore\\": "src/"
+		}
+	},
+	"require": {}
+}

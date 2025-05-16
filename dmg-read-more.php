@@ -13,22 +13,27 @@
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 /**
- * Block init
+ * Init plugin when PHP requirements are met
  */
-function dmg_read_more_block_init() {
-	if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
-		wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
-		return;
-	}
-
-	if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
-		wp_register_block_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
-	}
-
-	$manifest_data = require __DIR__ . '/build/blocks-manifest.php';
-	foreach ( array_keys( $manifest_data ) as $block_type ) {
-		register_block_type( __DIR__ . "/build/{$block_type}" );
-	}
+if ( version_compare( PHP_VERSION, '8.0', '>' ) ) {
+	add_action(
+		'plugins_loaded',
+		function () {
+			\DMG\ReadMore\Main::instance();
+		}
+	);
+} else {
+	add_action(
+		'admin_notices',
+		function () {
+			?>
+			<div class="notice notice-error">
+				<p><?php esc_html_e( 'DMG Read More requires PHP 8.0 or higher', 'dmg-read-more' ); ?></p>
+			</div>
+			<?php
+		}
+	);
 }
-add_action( 'init', 'dmg_read_more_block_init' );
