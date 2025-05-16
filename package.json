@@ -1,0 +1,21 @@
+{
+	"name": "dmg-read-more",
+	"version": "0.1.0",
+	"description": "Read more link to a post",
+	"author": "Mik",
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"scripts": {
+		"build": "wp-scripts build --webpack-copy-php --blocks-manifest --source-path=src/Blocks",
+		"format": "wp-scripts format",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"packages-update": "wp-scripts packages-update",
+		"plugin-zip": "wp-scripts plugin-zip",
+		"start": "wp-scripts start --webpack-copy-php --blocks-manifest --source-path=src/Blocks"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.16.0"
+	},
+	"prettier": "@wordpress/prettier-config"
+}

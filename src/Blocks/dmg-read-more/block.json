@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "dmg/dmg-read-more",
+	"version": "0.1.0",
+	"title": "DMG Read More",
+	"category": "text",
+	"icon": "admin-links",
+	"description": "Read more link to a post",
+	"example": {},
+	"attributes": {
+		"readMoreId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"textdomain": "dmg-read-more",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php",
+	"viewScript": "file:./view.js"
+}

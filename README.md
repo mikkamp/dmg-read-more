@@ -1,0 +1,3 @@
+# DMG Read More
+
+Adds a read more block linking to a specific post...
