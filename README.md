@@ -5,6 +5,12 @@ This plugin has two features:
 1. A read more block linking to a specific post
 2. A WP-CLI search utility for finding a block within posts
 
+## WP-CLI command examples
+
+- `wp dmg-read-more search` : Search for the dmg/dmg-read-more block, withing posts from the last 30 days
+- `wp dmg-read-more search --date-after=2025-01-01` : Search for the block in any posts created after the 1st of January 2025
+- `wp dmg-read-more search --date-after=2025-01-01 --date-before=2025-01-31` : Search for the block in any posts created in January
+
 ## Prerequisites
 
 -   WordPress 6.8+
