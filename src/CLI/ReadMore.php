@@ -37,7 +37,7 @@ class ReadMore extends WP_CLI_Command {
 					[
 						'name'        => 'block-name',
 						'type'        => 'assoc',
-						'description' => 'Search for a specific block name. Format as namespace/block-name',
+						'description' => 'Search for a specific block name (default dmg/dmg-read-more). Format as namespace/block-name',
 						'optional'    => true,
 					],
 					[
@@ -73,7 +73,7 @@ class ReadMore extends WP_CLI_Command {
 	public function search( $args, $assoc_args ) {
 		$this->parse_args( $assoc_args );
 
-		WP_CLI::line(
+		WP_CLI::debug(
 			sprintf(
 				/* translators: block name */
 				__( 'Searching for block "%s"...', 'dmg-read-more' ),
@@ -91,7 +91,7 @@ class ReadMore extends WP_CLI_Command {
 
 		$time_end = microtime( true );
 
-		WP_CLI::success(
+		WP_CLI::debug(
 			sprintf(
 				/* translators: human readable elapsed time */
 				__( 'Completed in %s', 'dmg-read-more' ),
@@ -117,11 +117,11 @@ class ReadMore extends WP_CLI_Command {
 		$count = count( $ids );
 
 		if ( $count < 1 ) {
-			WP_CLI::line( __( 'No matching posts found.', 'dmg-read-more' ) );
+			WP_CLI::log( __( 'No matching posts found.', 'dmg-read-more' ) );
 			return;
 		}
 
-		WP_CLI::line(
+		WP_CLI::debug(
 			sprintf(
 				/* translators: matching post count */
 				_n(
@@ -135,7 +135,7 @@ class ReadMore extends WP_CLI_Command {
 		);
 
 		foreach ( $ids as $id ) {
-			WP_CLI::line( $id );
+			WP_CLI::log( $id );
 		}
 	}
 
@@ -150,6 +150,14 @@ class ReadMore extends WP_CLI_Command {
 		$rows_matched = 0;
 		$batch_count  = 0;
 		$count        = 0;
+
+		/*
+		 * Using a raw query instead of WP_Query to avoid object caching.
+		 * WP VIP recommends to clear the cache after processing a batch of posts, which would be slower than comparing the content directly.
+		 * See: https://docs.wpvip.com/vip-cli/wp-cli-with-vip-cli/cli-commands-at-scale/#h-avoid-memory-exhaustion
+		 *
+		 * Less flexibility compared to a WP_Query but I believe this is a trade-off to better performance.
+		 */
 
 		// Format base SQL
 		$sql = "SELECT ID, post_content from {$wpdb->posts} WHERE post_type='post' AND post_status='publish' AND post_date_gmt >= '{$this->after_date}'";
@@ -172,7 +180,7 @@ class ReadMore extends WP_CLI_Command {
 
 			foreach ( $rows as $row ) {
 				if ( str_contains( $row['post_content'], $search ) ) {
-					WP_CLI::line( $row['ID'] );
+					WP_CLI::log( $row['ID'] );
 					++$rows_matched;
 				}
 			}
@@ -181,7 +189,7 @@ class ReadMore extends WP_CLI_Command {
 			++$batch_count;
 		} while ( $count > 0 && $count >= $batch_size );
 
-		WP_CLI::line(
+		WP_CLI::debug(
 			sprintf(
 				/* translators: batch count */
 				_n(
@@ -195,7 +203,7 @@ class ReadMore extends WP_CLI_Command {
 		);
 
 		if ( $rows_matched < 1 ) {
-			WP_CLI::line( __( 'No matching posts found.', 'dmg-read-more' ) );
+			WP_CLI::log( __( 'No matching posts found.', 'dmg-read-more' ) );
 		}
 	}
 
@@ -205,8 +213,6 @@ class ReadMore extends WP_CLI_Command {
 	 * @param array $args
 	 */
 	private function parse_args( array $args ) {
-		global $wpdb;
-
 		if ( empty( $args['block-name'] ) || ! $this->validate_block_name( $args['block-name'] ) ) {
 			$this->block_name = 'dmg/dmg-read-more';
 		} else {
@@ -234,7 +240,7 @@ class ReadMore extends WP_CLI_Command {
 	 */
 	private function validate_block_name( string $block_name ): bool {
 		if ( preg_match( '#^([\w]+/)?[\w-]+$#', $block_name ) !== 1 ) {
-			WP_CLI::warning(
+			WP_CLI::error(
 				sprintf(
 					/* translators: invalid block name */
 					__( 'Invalid block name "%s", should be in the format "block-name" or "namespace/block-name"', 'dmg-read-more' ),
@@ -256,7 +262,7 @@ class ReadMore extends WP_CLI_Command {
 	 */
 	private function validate_date( string $date ): bool {
 		if ( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/', $date ) !== 1 ) {
-			WP_CLI::warning(
+			WP_CLI::error(
 				sprintf(
 					/* translators: invalid date */
 					__( 'Invalid date "%s"', 'dmg-read-more' ),
