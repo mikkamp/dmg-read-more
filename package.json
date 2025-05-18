@@ -17,5 +17,12 @@
 	"devDependencies": {
 		"@wordpress/scripts": "^30.16.0"
 	},
-	"prettier": "@wordpress/prettier-config"
+	"prettier": "@wordpress/prettier-config",
+	"files": [
+		"build",
+		"dmg-read-more.php",
+		"src",
+		"!src/Blocks",
+		"vendor"
+	]
 }
