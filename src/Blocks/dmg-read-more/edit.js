@@ -1,76 +1,70 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { Post, store } from '@wordpress/core-data';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, TextControl } from '@wordpress/components';
-import './editor.scss';
+import { PanelBody } from '@wordpress/components';
+import { useEntityRecord } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
 
 /**
- * Render block contents
- *
- * @param {number} readMoreId
- * @param {Post} post
- * @returns Block contents
+ * Internal dependencies
  */
-const renderContents = ( readMoreId, post ) => {
-	if ( ! readMoreId ) {
-		return __( 'Select a post...', 'dmg-read-more' );
-	}
-
-	if ( ! post ) {
-		return __( 'Loading...', 'dmg-read-more' );
-	}
-
-	return (
-		<>
-			{ __( 'Read More: ', 'dmg-read-more' ) }
-			<a href={ post.link }>{ post.title?.rendered }</a>
-		</>
-	);
-};
+import PostSelector from './post-selector';
 
 /**
  * Structure of the block in the context of the editor
  *
+ * @param {Object} props Block properties
  * @return {Element} Element to render
  */
-export default function Edit( { attributes, setAttributes } ) {
-	const { readMoreId } = attributes;
-
-	// Fetch the post object from the data store
-	const post = useSelect(
-		( select ) =>
-			readMoreId
-				? select( store ).getEntityRecord(
-						'postType',
-						'post',
-						readMoreId
-				  )
-				: null,
-		[ readMoreId ]
+export default function Edit( props ) {
+	const { readMoreId } = props.attributes;
+	const { hasResolved, record: post = null } = useEntityRecord(
+		'postType',
+		'post',
+		readMoreId
 	);
 
-	const onChangeReadMore = ( newId ) => {
-		setAttributes( { readMoreId: Number( newId ) } );
+	/**
+	 * Render the read more content
+	 *
+	 * @return {Element} Rendered content
+	 */
+	const readMoreContent = () => {
+		if ( ! readMoreId ) {
+			return __( 'Select a post…', 'dmg-read-more' );
+		}
+
+		if ( readMoreId > 0 && ! hasResolved ) {
+			return __( 'Loading…', 'dmg-read-more' );
+		}
+
+		if ( readMoreId > 0 && hasResolved && ! post ) {
+			return __(
+				'Not found, please select another post',
+				'dmg-read-more'
+			);
+		}
+
+		return (
+			<>
+				{ __( 'Read More: ', 'dmg-read-more' ) }
+				<a href={ post.link }>{ post.title?.rendered }</a>
+			</>
+		);
 	};
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody>
-					<TextControl
-						label={ __( 'Read More post ID', 'dmg-read-more' ) }
-						help={ __( 'Select a post', 'dmg-read-more' ) }
-						value={ readMoreId }
-						onChange={ onChangeReadMore }
-					/>
+					<PostSelector { ...props } />
 				</PanelBody>
 			</InspectorControls>
 
-			<p { ...useBlockProps() }>{ renderContents( readMoreId, post ) }</p>
+			<p { ...useBlockProps( { className: 'dmg-read-more' } ) }>
+				{ readMoreContent() }
+			</p>
 		</>
 	);
 }
